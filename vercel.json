@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/api/consulta", "destination": "/api/consulta" },
+    { "source": "/api/consultas", "destination": "/api/consultas" },
+    { "source": "/(.*)", "destination": "/public/$1" }
+  ]
+}

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TecnoForm – Tienda de Informática</title>
+  <link rel="stylesheet" href="tecnoform_estilos.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Tecno<span>Form</span></div>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#inicio">Inicio</a></li>
+    <li><a href="#nosotros">Nosotros</a></li>
+    <li><a href="#catalogo">Catálogo</a></li>
+    <li><a href="#servicios">Servicios</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</nav>
+
+<!-- HERO -->
+<section id="inicio">
+  <div class="hero-content">
+    <h1>Tu Tienda de <span>Informática</span><br>en Formosa</h1>
+    <p>RAM, SSD, teclados, placas de video y más. Componentes y periféricos con asesoramiento técnico real.</p>
+    <a href="#catalogo" class="btn">Ver Catálogo</a>
+    <a href="#contacto" class="btn btn-outline">Consultar</a>
+  </div>
+</section>
+
+<!-- NOSOTROS -->
+<section id="nosotros">
+  <div class="container">
+    <h2 class="section-title">Sobre <span>TecnoForm</span></h2>
+    <p style="text-align:center;color:var(--gris2);margin-bottom:2rem;max-width:600px;margin-left:auto;margin-right:auto;">
+      Tienda de informática en Formosa con foco en componentes de calidad y atención personalizada. Te ayudamos a elegir el hardware ideal para tu PC, laptop o proyecto.
+    </p>
+    <div class="cards">
+      <div class="card">
+        <h3>🏪 Quiénes somos</h3>
+        <p>Nacimos para cubrir la demanda de hardware y periféricos en Formosa con precios justos y productos originales con garantía.</p>
+      </div>
+      <div class="card">
+        <h3>🎯 Misión</h3>
+        <p>Ofrecer tecnología accesible con asesoramiento honesto. No vendemos lo más caro, vendemos lo que mejor se adapta a vos.</p>
+      </div>
+      <div class="card">
+        <h3>🛡️ Garantía</h3>
+        <p>Todos nuestros productos cuentan con garantía oficial. Trabajamos con distribuidores autorizados en Argentina.</p>
+      </div>
+      <div class="card">
+        <h3>🔧 Soporte</h3>
+        <p>Contamos con servicio técnico propio para instalación, diagnóstico y reparación de equipos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================================
+     CATÁLOGO DEMO
+     Para editar productos: modificar el array PRODUCTOS en tecnoform_script.js
+     Para agregar categorías: agregar en .cat-tabs y en el array
+============================================= -->
+<section id="catalogo">
+  <div class="container">
+    <h2 class="section-title">Nuestro <span>Catálogo</span></h2>
+
+    <!-- CATEGORÍAS — editar aquí los nombres de las pestañas -->
+    <div class="cat-tabs">
+      <button class="cat-tab active" data-cat="todos">Todos</button>
+      <button class="cat-tab" data-cat="ram">RAM</button>
+      <button class="cat-tab" data-cat="ssd">SSD</button>
+      <button class="cat-tab" data-cat="teclado">Teclados</button>
+      <button class="cat-tab" data-cat="mouse">Mouse</button>
+      <button class="cat-tab" data-cat="monitor">Monitores</button>
+    </div>
+
+    <div class="prod-grid" id="prodGrid"></div>
+  </div>
+</section>
+<!-- FIN CATÁLOGO -->
+
+<!-- SERVICIOS -->
+<section id="servicios">
+  <div class="container">
+    <h2 class="section-title">Nuestros <span>Servicios</span></h2>
+    <div class="servicios-grid">
+      <div class="servicio">
+        <div class="icon">🔧</div>
+        <h3>Armado de PC</h3>
+        <p>Ensamblamos tu PC a medida según tu presupuesto y uso.</p>
+        <ul class="beneficios">
+          <li>Asesoramiento de componentes</li>
+          <li>Armado y cableado prolijo</li>
+          <li>Testeo antes de entregar</li>
+        </ul>
+      </div>
+      <div class="servicio">
+        <div class="icon">⬆️</div>
+        <h3>Upgrades</h3>
+        <p>Mejoramos tu equipo existente: más RAM, SSD, placa de video.</p>
+        <ul class="beneficios">
+          <li>Diagnóstico previo sin costo</li>
+          <li>Compatibilidad garantizada</li>
+          <li>Instalación incluida</li>
+        </ul>
+      </div>
+      <div class="servicio">
+        <div class="icon">🛠️</div>
+        <h3>Service Técnico</h3>
+        <p>Reparación de PCs y laptops. Diagnóstico, limpieza y mantenimiento.</p>
+        <ul class="beneficios">
+          <li>Presupuesto sin cargo</li>
+          <li>Cambio de pasta térmica</li>
+          <li>Recuperación de datos</li>
+        </ul>
+      </div>
+      <div class="servicio">
+        <div class="icon">💻</div>
+        <h3>Instalación de SO</h3>
+        <p>Instalamos Windows, Linux y drivers. Formateo y configuración completa.</p>
+        <ul class="beneficios">
+          <li>Windows original</li>
+          <li>Drivers y actualizaciones</li>
+          <li>Antivirus configurado</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="container">
+    <h2 class="section-title">Preguntas <span>Frecuentes</span></h2>
+    <div id="faqList">
+      <div class="faq-item">
+        <div class="faq-q">¿Los productos tienen garantía? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">Sí. Todos los productos cuentan con garantía del fabricante. RAM y SSD generalmente tienen garantía de 3 años. Periféricos entre 1 y 2 años según la marca.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">¿Hacen envíos a domicilio? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">Sí, realizamos envíos dentro de Formosa capital sin cargo a partir de cierto monto. Para el interior de la provincia coordinamos por correo o encomienda.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">¿Puedo traer mi PC para que la revisen? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">Absolutamente. Traé tu equipo al local y realizamos un diagnóstico gratuito. Si el problema requiere reparación, te presupuestamos antes de empezar.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">¿Aceptan tarjeta de crédito y cuotas? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">Sí, aceptamos todas las tarjetas. Dependiendo del banco podés acceder a planes de cuotas sin interés. Consultanos por WhatsApp para las promociones vigentes.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">¿Qué RAM necesito para mi PC? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">Depende del uso. Para ofimática y navegación, 8 GB DDR4 es suficiente. Para gaming o edición de video recomendamos 16 GB o más. Siempre consultanos el modelo de tu placa madre primero.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACTO -->
+<section id="contacto">
+  <div class="container">
+    <h2 class="section-title">Contacto</h2>
+    <div class="contacto-grid">
+      <div class="contacto-info">
+        <h3>Información de Contacto</h3>
+        <p>📍 Formosa, Provincia de Formosa, Argentina</p>
+        <p>📞 <a href="tel:+5437000000000">+54 370 000-0000</a></p>
+        <p>✉️ <a href="mailto:info@tecnoform.com.ar">info@tecnoform.com.ar</a></p>
+        <p>🕐 Lunes a Viernes: 8:00 – 18:00 hs</p>
+        <p>🕐 Sábados: 8:00 – 12:00 hs</p>
+        <div class="redes">
+        <a href="#" class="red-btn fb"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="red-btn ig"><i class="fab fa-instagram"></i></a>
+        <a href="https://wa.me/5437000000000" class="red-btn wa"><i class="fab fa-whatsapp"></i></a>
+        <a href="#" class="red-btn li"><i class="fab fa-linkedin-in"></i></a>
+       </div>
+        <div class="mapa">
+          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d60949.7!2d-58.1749!3d-26.1775!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94534ca7e1e45e1d%3A0x75ddb44dcbbf6e04!2sFormosa%2C%20Formosa!5e0!3m2!1ses!2sar!4v1234567890" allowfullscreen="" loading="lazy"></iframe>
+        </div>
+      </div>
+      <div>
+        <h3 style="margin-bottom:1rem;">Enviar Consulta</h3>
+        <form id="contactForm" novalidate>
+          <input type="text" id="nombre" placeholder="Nombre completo *" required>
+          <input type="email" id="email" placeholder="Correo electrónico *" required>
+          <input type="tel" id="telefono" placeholder="Teléfono">
+          <select id="asunto">
+            <option value="">Seleccionar motivo...</option>
+            <option>Consulta de producto</option>
+            <option>Armado de PC</option>
+            <option>Service técnico</option>
+            <option>Presupuesto</option>
+            <option>Otro</option>
+          </select>
+          <textarea id="mensaje" placeholder="Mensaje *" required></textarea>
+          <button type="submit">Enviar Consulta</button>
+          <p id="msg"></p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p><strong style="color:var(--blanco);">TecnoForm</strong> – Tienda de Informática</p>
+  <p style="margin-top:.5rem;">Formosa, Argentina | <a href="mailto:info@tecnoform.com.ar">info@tecnoform.com.ar</a></p>
+  <p style="margin-top:.5rem;font-size:.8rem;">© 2026 TecnoForm. Todos los derechos reservados.</p>
+</footer>
+
+<script src="tecnoform_script.js"></script>
+</body>
+</html>
