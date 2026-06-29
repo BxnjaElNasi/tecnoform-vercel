@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TecnoForm – Panel Admin</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root {
+  --bg:#0d0d0d; --surface:#161616; --surface2:#1e1e1e; --surface3:#252525;
+  --rojo:#c0392b; --rojo2:#e74c3c; --verde:#27ae60; --verde2:#2ecc71;
+  --amarillo:#f39c12; --blanco:#f0f0f0; --gris:#aaa; --gris2:#555;
+  --border:#2a2a2a; --border2:#333; --font:'Segoe UI',system-ui,sans-serif;
+  --radius:10px; --shadow:0 8px 32px rgba(0,0,0,.5);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--font);background:var(--bg);color:var(--blanco);min-height:100vh;overflow-x:hidden;}
+
+/* LOGIN */
+#loginOverlay{position:fixed;inset:0;z-index:9999;background:radial-gradient(ellipse at 30% 40%,#1a0404 0%,#0d0d0d 60%);display:flex;align-items:center;justify-content:center;transition:opacity .5s,transform .5s;}
+#loginOverlay.hide{opacity:0;pointer-events:none;transform:scale(1.04);}
+.login-box{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:3rem 2.5rem;width:100%;max-width:400px;box-shadow:0 0 60px rgba(192,57,43,.15),var(--shadow);animation:loginIn .6s cubic-bezier(.22,1,.36,1) both;}
+@keyframes loginIn{from{opacity:0;transform:translateY(30px) scale(.97)}to{opacity:1;transform:none}}
+.login-logo{text-align:center;margin-bottom:2rem;}
+.login-logo .wordmark{font-size:1.8rem;font-weight:800;color:var(--blanco);letter-spacing:-1px;}
+.login-logo .wordmark span{color:var(--rojo);}
+.login-logo p{color:var(--gris);font-size:.82rem;margin-top:.3rem;letter-spacing:.1em;text-transform:uppercase;}
+.login-field{margin-bottom:1.2rem;position:relative;}
+.login-field i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--gris2);font-size:.9rem;}
+.login-field input{width:100%;padding:.85rem 1rem .85rem 2.6rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--blanco);font-size:.95rem;transition:border .2s,box-shadow .2s;}
+.login-field input:focus{outline:none;border-color:var(--rojo);box-shadow:0 0 0 3px rgba(192,57,43,.2);}
+.login-field input::placeholder{color:var(--gris2);}
+.login-btn{width:100%;padding:.9rem;background:var(--rojo);border:none;border-radius:8px;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;letter-spacing:.03em;transition:background .2s,transform .1s,box-shadow .2s;position:relative;overflow:hidden;}
+.login-btn:hover{background:var(--rojo2);box-shadow:0 4px 20px rgba(192,57,43,.4);}
+.login-btn:active{transform:scale(.98);}
+.login-btn .ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.25);transform:scale(0);animation:ripple .5s linear;pointer-events:none;}
+@keyframes ripple{to{transform:scale(4);opacity:0}}
+#loginError{color:var(--rojo2);font-size:.82rem;text-align:center;margin-top:.8rem;min-height:1.2em;}
+
+/* SHELL */
+#shell{display:none;min-height:100vh;}
+#shell.visible{display:flex;flex-direction:column;animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* TOPBAR */
+.topbar{height:60px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;position:sticky;top:0;z-index:100;}
+.topbar .brand{font-size:1.1rem;font-weight:700;}
+.topbar .brand span{color:var(--rojo);}
+.topbar .brand small{color:var(--gris);font-weight:400;font-size:.75rem;margin-left:.5rem;}
+.topbar-right{display:flex;align-items:center;gap:1rem;}
+.topbar-right .avatar{width:34px;height:34px;border-radius:50%;background:var(--rojo);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;}
+.topbar-right .logout-btn{background:none;border:1px solid var(--border2);color:var(--gris);border-radius:6px;padding:.35rem .8rem;font-size:.8rem;cursor:pointer;transition:all .2s;}
+.topbar-right .logout-btn:hover{border-color:var(--rojo);color:var(--rojo2);}
+
+/* LAYOUT */
+.main{display:flex;flex:1;}
+
+/* SIDEBAR */
+.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);padding:1.5rem 0;flex-shrink:0;position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;}
+.sidebar-label{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gris2);padding:.5rem 1.2rem;}
+.nav-item{display:flex;align-items:center;gap:.8rem;padding:.7rem 1.2rem;border-radius:8px;cursor:pointer;font-size:.88rem;color:var(--gris);transition:all .2s;margin:0 .5rem;position:relative;}
+.nav-item i{width:16px;text-align:center;}
+.nav-item:hover{background:var(--surface2);color:var(--blanco);}
+.nav-item.active{background:rgba(192,57,43,.15);color:var(--rojo2);}
+.nav-item.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;border-radius:0 3px 3px 0;background:var(--rojo);}
+.badge-count{margin-left:auto;background:var(--rojo);color:#fff;font-size:.65rem;padding:.1rem .45rem;border-radius:10px;font-weight:700;}
+
+/* CONTENT */
+.content{flex:1;padding:2rem;overflow-y:auto;}
+.page{display:none;animation:slideUp .3s cubic-bezier(.22,1,.36,1);}
+.page.active{display:block;}
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.page-header{margin-bottom:2rem;}
+.page-header h1{font-size:1.6rem;font-weight:700;}
+.page-header p{color:var(--gris);font-size:.88rem;margin-top:.3rem;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2rem;}
+.stat-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:1.3rem;display:flex;align-items:center;gap:1rem;transition:transform .2s,box-shadow .2s;}
+.stat-card:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.3);}
+.stat-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.stat-icon.red{background:rgba(192,57,43,.2);color:var(--rojo2);}
+.stat-icon.green{background:rgba(39,174,96,.2);color:var(--verde2);}
+.stat-icon.yellow{background:rgba(243,156,18,.2);color:var(--amarillo);}
+.stat-icon.blue{background:rgba(52,152,219,.2);color:#5dade2;}
+.stat-info .value{font-size:1.6rem;font-weight:800;line-height:1;}
+.stat-info .label{font-size:.75rem;color:var(--gris);margin-top:.2rem;}
+
+/* TOOLBAR */
+.toolbar{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+.search-wrap{position:relative;flex:1;min-width:200px;}
+.search-wrap i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gris2);font-size:.85rem;}
+.search-input{width:100%;padding:.65rem 1rem .65rem 2.4rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--blanco);font-size:.88rem;}
+.search-input:focus{outline:none;border-color:var(--rojo);}
+.search-input::placeholder{color:var(--gris2);}
+select.filter-select{padding:.65rem 1rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--blanco);font-size:.85rem;cursor:pointer;}
+select.filter-select:focus{outline:none;border-color:var(--rojo);}
+select.filter-select option{background:var(--surface2);}
+.reload-btn{display:flex;align-items:center;gap:.5rem;padding:.65rem 1rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--gris);font-size:.85rem;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.reload-btn:hover{border-color:var(--rojo);color:var(--rojo2);}
+
+/* TABLE */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+thead{background:var(--surface2);}
+th{padding:.9rem 1rem;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gris);font-weight:600;text-align:left;white-space:nowrap;}
+td{padding:.9rem 1rem;font-size:.86rem;border-top:1px solid var(--border);vertical-align:middle;}
+tr:hover td{background:rgba(255,255,255,.03);}
+
+/* BADGES */
+.status-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.25rem .75rem;border-radius:20px;font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
+.status-badge.espera{background:rgba(192,57,43,.2);color:#ff6b5b;border:1px solid rgba(192,57,43,.4);}
+.status-badge.respondido{background:rgba(39,174,96,.2);color:#5dda8a;border:1px solid rgba(39,174,96,.4);}
+.status-badge .dot{width:6px;height:6px;border-radius:50%;}
+.status-badge.espera .dot{background:#c0392b;}
+.status-badge.respondido .dot{background:var(--verde2);}
+
+.action-btn{background:none;border:1px solid var(--border2);border-radius:6px;color:var(--gris);padding:.35rem .7rem;cursor:pointer;font-size:.78rem;transition:all .2s;white-space:nowrap;}
+.action-btn:hover{border-color:var(--rojo);color:var(--rojo2);}
+.action-btn.green:hover{border-color:var(--verde);color:var(--verde2);}
+.action-btn i{margin-right:.3rem;}
+.actions-cell{display:flex;gap:.4rem;align-items:center;}
+.type-pill{display:inline-block;padding:.2rem .6rem;border-radius:6px;font-size:.72rem;font-weight:600;background:var(--surface3);color:var(--gris);}
+
+/* REPLY DRAWER */
+#replyDrawer{position:fixed;right:0;top:0;bottom:0;width:420px;max-width:95vw;background:var(--surface);border-left:1px solid var(--border2);z-index:200;transform:translateX(100%);transition:transform .4s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column;box-shadow:-8px 0 40px rgba(0,0,0,.5);}
+#replyDrawer.open{transform:translateX(0);}
+.drawer-header{padding:1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.drawer-header h2{font-size:1.1rem;}
+.drawer-close{background:none;border:none;color:var(--gris);font-size:1.2rem;cursor:pointer;padding:.3rem;border-radius:6px;transition:color .2s;}
+.drawer-close:hover{color:var(--rojo2);}
+.drawer-body{padding:1.5rem;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:1rem;}
+.drawer-field{display:flex;flex-direction:column;gap:.4rem;}
+.drawer-field label{font-size:.78rem;color:var(--gris);text-transform:uppercase;letter-spacing:.06em;}
+.drawer-field .val{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.7rem;font-size:.88rem;color:var(--blanco);}
+.drawer-field .msg-block{background:var(--surface3);border-left:3px solid var(--rojo);padding:.8rem 1rem;border-radius:0 8px 8px 0;font-size:.88rem;line-height:1.6;color:#ccc;}
+.drawer-field textarea{width:100%;padding:.8rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--blanco);font-size:.9rem;resize:vertical;min-height:130px;font-family:var(--font);transition:border .2s;}
+.drawer-field textarea:focus{outline:none;border-color:var(--rojo);}
+.drawer-field textarea::placeholder{color:var(--gris2);}
+.drawer-footer{padding:1.2rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:.8rem;}
+.drawer-footer .send-btn{flex:1;padding:.85rem;background:var(--rojo);border:none;border-radius:8px;color:#fff;font-weight:700;font-size:.95rem;cursor:pointer;transition:background .2s;}
+.drawer-footer .send-btn:hover{background:var(--rojo2);}
+.drawer-footer .cancel-btn{padding:.85rem 1.2rem;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--gris);font-size:.88rem;cursor:pointer;}
+#drawerDim{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:199;opacity:0;pointer-events:none;transition:opacity .3s;}
+#drawerDim.show{opacity:1;pointer-events:all;}
+
+/* LOADING */
+.loading-state{text-align:center;padding:4rem 1rem;color:var(--gris);}
+.loading-state i{font-size:2rem;margin-bottom:1rem;opacity:.5;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:4rem 1rem;color:var(--gris);}
+.empty-state i{font-size:2.5rem;margin-bottom:1rem;opacity:.3;}
+.empty-state p{font-size:.9rem;}
+
+/* TOAST */
+#toast{position:fixed;bottom:2rem;right:2rem;z-index:9998;background:var(--surface3);border:1px solid var(--border2);border-radius:10px;padding:.9rem 1.3rem;font-size:.88rem;display:flex;align-items:center;gap:.7rem;transform:translateY(80px);opacity:0;transition:all .35s cubic-bezier(.22,1,.36,1);box-shadow:var(--shadow);}
+#toast.show{transform:none;opacity:1;}
+#toast.success{border-left:3px solid var(--verde2);}
+#toast.error{border-left:3px solid var(--rojo2);}
+#toast i{font-size:1rem;}
+#toast.success i{color:var(--verde2);}
+#toast.error i{color:var(--rojo2);}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--gris2);border-radius:3px;}
+
+@media(max-width:768px){
+  .sidebar{display:none;}
+  th:nth-child(4),td:nth-child(4){display:none;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="wordmark">Tecno<span>Form</span></div>
+      <p>Panel de Administración</p>
+    </div>
+    <div class="login-field">
+      <i class="fas fa-user"></i>
+      <input type="text" id="loginUser" placeholder="Usuario" autocomplete="username">
+    </div>
+    <div class="login-field">
+      <i class="fas fa-lock"></i>
+      <input type="password" id="loginPass" placeholder="Contraseña" autocomplete="current-password">
+    </div>
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">
+      <i class="fas fa-sign-in-alt" style="margin-right:.5rem;"></i> Ingresar
+    </button>
+    <p id="loginError"></p>
+  </div>
+</div>
+
+<!-- DRAWER DIM -->
+<div id="drawerDim" onclick="closeDrawer()"></div>
+
+<!-- REPLY DRAWER -->
+<div id="replyDrawer">
+  <div class="drawer-header">
+    <h2><i class="fas fa-reply" style="color:var(--rojo);margin-right:.5rem;"></i> Responder Consulta</h2>
+    <button class="drawer-close" onclick="closeDrawer()"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="drawer-field"><label>N° Consulta</label><div class="val" id="d-id">—</div></div>
+    <div class="drawer-field"><label>Cliente</label><div class="val" id="d-cliente">—</div></div>
+    <div class="drawer-field"><label>Email</label><div class="val" id="d-email">—</div></div>
+    <div class="drawer-field"><label>Asunto</label><div class="val" id="d-tipo">—</div></div>
+    <div class="drawer-field"><label>Mensaje original</label><div class="msg-block" id="d-msg">—</div></div>
+    <div class="drawer-field">
+      <label>Respuesta / Nota interna</label>
+      <textarea id="d-respuesta" placeholder="Escribí tu respuesta o nota aquí..."></textarea>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <button class="cancel-btn" onclick="closeDrawer()">Cancelar</button>
+    <button class="send-btn" onclick="sendReply()">
+      <i class="fas fa-paper-plane" style="margin-right:.5rem;"></i>Guardar y Marcar Respondido
+    </button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"><i class="fas fa-check-circle"></i> <span id="toastMsg">Listo</span></div>
+
+<!-- SHELL -->
+<div id="shell">
+  <div class="topbar">
+    <div class="brand">Tecno<span>Form</span> <small>Admin</small></div>
+    <div class="topbar-right">
+      <div class="avatar" id="topAvatar">A</div>
+      <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Salir</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="sidebar">
+      <div class="sidebar-label">Menú</div>
+      <div class="nav-item active" data-page="dashboard" onclick="navTo('dashboard')">
+        <i class="fas fa-chart-pie"></i> Dashboard
+      </div>
+      <div class="nav-item" data-page="consultas" onclick="navTo('consultas')">
+        <i class="fas fa-inbox"></i> Consultas
+        <span class="badge-count" id="pendingBadge">0</span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-header">
+          <h1>Dashboard</h1>
+          <p>Resumen general de actividad</p>
+        </div>
+        <div class="stats-grid" id="statsGrid"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>N°</th><th>Cliente</th><th>Asunto</th><th>Fecha</th><th>Estado</th></tr>
+            </thead>
+            <tbody id="recentTbody">
+              <tr><td colspan="5"><div class="loading-state"><i class="fas fa-spinner"></i><p>Cargando...</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CONSULTAS -->
+      <div class="page" id="page-consultas">
+        <div class="page-header">
+          <h1>Consultas</h1>
+          <p>Gestioná todas las consultas recibidas desde la web</p>
+        </div>
+        <div class="toolbar">
+          <div class="search-wrap">
+            <i class="fas fa-search"></i>
+            <input class="search-input" id="searchInput" placeholder="Buscar por nombre, email, asunto…" oninput="filterConsultas()">
+          </div>
+          <select class="filter-select" id="filterEstado" onchange="filterConsultas()">
+            <option value="">Todos los estados</option>
+            <option value="espera">En espera</option>
+            <option value="respondido">Respondido</option>
+          </select>
+          <select class="filter-select" id="filterOrder" onchange="filterConsultas()">
+            <option value="desc">Más reciente</option>
+            <option value="asc">Más antiguo</option>
+          </select>
+          <button class="reload-btn" onclick="loadConsultas()">
+            <i class="fas fa-sync-alt"></i> Actualizar
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>N°</th>
+                <th>Cliente</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Asunto</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="consultasTbody">
+              <tr><td colspan="8"><div class="loading-state"><i class="fas fa-spinner"></i><p>Cargando...</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   CONFIGURACIÓN
+   Cambiá ADMIN_SECRET para que coincida con
+   la variable de entorno en Vercel.
+══════════════════════════════════════════ */
+const ADMIN_SECRET = 'tecnoform2024';
+
+// Usuarios del panel (solo para el login local, no tocan la BD)
+const USERS = [
+  { user:'admin',    pass:'admin',   nombre:'Administrador', rol:'admin'    },
+  { user:'operador', pass:'oper123', nombre:'Operador',       rol:'operador' },
+];
+
+/* ══════════════════════════════════════════
+   ESTADO
+══════════════════════════════════════════ */
+let CONSULTAS = [];
+let currentDrawerConsultaId = null;
+let currentSession = null;
+
+/* ══════════════════════════════════════════
+   AUTH
+══════════════════════════════════════════ */
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const found = USERS.find(x => x.user === u && x.pass === p);
+  const errEl = document.getElementById('loginError');
+
+  if (!found) {
+    errEl.textContent = 'Usuario o contraseña incorrectos.';
+    document.getElementById('loginPass').value = '';
+    const box = document.querySelector('.login-box');
+    box.style.animation = 'none';
+    setTimeout(() => box.style.animation = 'shake .4s ease', 10);
+    return;
+  }
+
+  currentSession = found;
+  errEl.textContent = '';
+  document.getElementById('loginOverlay').classList.add('hide');
+  setTimeout(() => {
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('shell').classList.add('visible');
+    document.getElementById('topAvatar').textContent = found.nombre[0].toUpperCase();
+    loadConsultas();
+  }, 500);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('loginOverlay').style.display !== 'none') doLogin();
+});
+
+function logout() {
+  currentSession = null;
+  document.getElementById('shell').classList.remove('visible');
+  document.getElementById('shell').style.display = '';
+  const ov = document.getElementById('loginOverlay');
+  ov.style.display = 'flex';
+  ov.classList.remove('hide');
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+}
+
+const shakeStyle = document.createElement('style');
+shakeStyle.textContent = '@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}';
+document.head.appendChild(shakeStyle);
+
+/* ══════════════════════════════════════════
+   API
+══════════════════════════════════════════ */
+async function apiGet() {
+  const r = await fetch('/api/admin-consultas', {
+    headers: { 'x-admin-secret': ADMIN_SECRET }
+  });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+async function apiPatch(payload) {
+  const r = await fetch('/api/admin-consultas', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'x-admin-secret': ADMIN_SECRET },
+    body: JSON.stringify(payload)
+  });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+/* ══════════════════════════════════════════
+   CARGA DE DATOS
+══════════════════════════════════════════ */
+async function loadConsultas() {
+  try {
+    CONSULTAS = await apiGet();
+    updateBadge();
+    renderStats();
+    renderRecent();
+    // Si la página de consultas está activa, refrescarla también
+    if (document.getElementById('page-consultas').classList.contains('active')) {
+      filterConsultas();
+    }
+    showToast('Datos actualizados', 'success');
+  } catch(err) {
+    showToast('Error al cargar: ' + err.message, 'error');
+    console.error(err);
+  }
+}
+
+/* ══════════════════════════════════════════
+   NAVEGACIÓN
+══════════════════════════════════════════ */
+function navTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelector(`[data-page="${page}"]`).classList.add('active');
+  if (page === 'consultas') filterConsultas();
+}
+
+/* ══════════════════════════════════════════
+   DASHBOARD
+══════════════════════════════════════════ */
+function updateBadge() {
+  const pending = CONSULTAS.filter(c => c.estado === 'espera').length;
+  document.getElementById('pendingBadge').textContent = pending;
+}
+
+function renderStats() {
+  const total = CONSULTAS.length;
+  const espera = CONSULTAS.filter(c => c.estado === 'espera').length;
+  const resp   = CONSULTAS.filter(c => c.estado === 'respondido').length;
+  const hoy = CONSULTAS.filter(c => {
+    const d = new Date(c.fecha);
+    const n = new Date();
+    return d.toDateString() === n.toDateString();
+  }).length;
+
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card"><div class="stat-icon red"><i class="fas fa-inbox"></i></div><div class="stat-info"><div class="value">${total}</div><div class="label">Total consultas</div></div></div>
+    <div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-clock"></i></div><div class="stat-info"><div class="value">${espera}</div><div class="label">En espera</div></div></div>
+    <div class="stat-card"><div class="stat-icon green"><i class="fas fa-check-double"></i></div><div class="stat-info"><div class="value">${resp}</div><div class="label">Respondidas</div></div></div>
+    <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-calendar-day"></i></div><div class="stat-info"><div class="value">${hoy}</div><div class="label">Hoy</div></div></div>
+  `;
+}
+
+function renderRecent() {
+  const recent = [...CONSULTAS].sort((a,b) => new Date(b.fecha)-new Date(a.fecha)).slice(0,5);
+  if (!recent.length) {
+    document.getElementById('recentTbody').innerHTML = '<tr><td colspan="5"><div class="empty-state"><i class="fas fa-inbox"></i><p>Sin consultas aún.</p></div></td></tr>';
+    return;
+  }
+  document.getElementById('recentTbody').innerHTML = recent.map(c => `
+    <tr>
+      <td><code style="color:var(--gris);font-size:.8rem;">#${c.id_consulta}</code></td>
+      <td>${c.nombre}</td>
+      <td><span class="type-pill">${c.asunto}</span></td>
+      <td style="color:var(--gris);font-size:.82rem;">${fmtDate(c.fecha)}</td>
+      <td>${statusBadge(c.estado)}</td>
+    </tr>
+  `).join('');
+}
+
+/* ══════════════════════════════════════════
+   CONSULTAS
+══════════════════════════════════════════ */
+function filterConsultas() {
+  let data = [...CONSULTAS];
+  const q   = (document.getElementById('searchInput').value || '').toLowerCase();
+  const est = document.getElementById('filterEstado').value;
+  const ord = document.getElementById('filterOrder').value;
+
+  if (q)   data = data.filter(c =>
+    (c.nombre||'').toLowerCase().includes(q) ||
+    (c.email||'').toLowerCase().includes(q)  ||
+    (c.asunto||'').toLowerCase().includes(q) ||
+    String(c.id_consulta).includes(q)
+  );
+  if (est) data = data.filter(c => c.estado === est);
+  data.sort((a,b) => ord === 'desc' ? new Date(b.fecha)-new Date(a.fecha) : new Date(a.fecha)-new Date(b.fecha));
+
+  const tbody = document.getElementById('consultasTbody');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><i class="fas fa-search"></i><p>No hay consultas que coincidan.</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(c => `
+    <tr>
+      <td><code style="color:var(--rojo2);font-weight:700;">#${c.id_consulta}</code></td>
+      <td><strong style="font-size:.88rem;">${c.nombre}</strong></td>
+      <td style="font-size:.82rem;color:#ccc;">${c.email}</td>
+      <td style="font-size:.82rem;color:var(--gris);">${c.telefono || '—'}</td>
+      <td><span class="type-pill">${c.asunto}</span></td>
+      <td style="font-size:.8rem;color:var(--gris);white-space:nowrap;">${fmtDate(c.fecha)}</td>
+      <td>${statusBadge(c.estado)}</td>
+      <td>
+        <div class="actions-cell">
+          <button class="action-btn" onclick="openDrawer(${c.id_consulta})"><i class="fas fa-reply"></i> Responder</button>
+          ${c.estado === 'espera'
+            ? `<button class="action-btn green" title="Marcar respondido" onclick="toggleStatus(${c.id_consulta})"><i class="fas fa-check"></i></button>`
+            : `<button class="action-btn" title="Volver a espera" onclick="toggleStatus(${c.id_consulta})"><i class="fas fa-undo"></i></button>`
+          }
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function statusBadge(estado) {
+  return estado === 'espera'
+    ? `<span class="status-badge espera"><span class="dot"></span>En espera</span>`
+    : `<span class="status-badge respondido"><span class="dot"></span>Respondido</span>`;
+}
+
+async function toggleStatus(id) {
+  const c = CONSULTAS.find(x => x.id_consulta === id);
+  if (!c) return;
+  const nuevoEstado = c.estado === 'espera' ? 'respondido' : 'espera';
+  try {
+    await apiPatch({ id_consulta: id, estado: nuevoEstado });
+    c.estado = nuevoEstado;
+    updateBadge(); renderStats(); renderRecent(); filterConsultas();
+    showToast(nuevoEstado === 'respondido' ? 'Marcada como Respondida ✓' : 'Marcada como En espera', nuevoEstado === 'respondido' ? 'success' : 'error');
+  } catch(err) {
+    showToast('Error: ' + err.message, 'error');
+  }
+}
+
+/* ══════════════════════════════════════════
+   DRAWER
+══════════════════════════════════════════ */
+function openDrawer(id) {
+  const c = CONSULTAS.find(x => x.id_consulta === id);
+  if (!c) return;
+  currentDrawerConsultaId = id;
+  document.getElementById('d-id').textContent      = '#' + c.id_consulta;
+  document.getElementById('d-cliente').textContent = c.nombre;
+  document.getElementById('d-email').textContent   = c.email;
+  document.getElementById('d-tipo').textContent    = c.asunto;
+  document.getElementById('d-msg').textContent     = c.mensaje;
+  document.getElementById('d-respuesta').value     = c.respuesta || '';
+  document.getElementById('replyDrawer').classList.add('open');
+  document.getElementById('drawerDim').classList.add('show');
+  setTimeout(() => document.getElementById('d-respuesta').focus(), 420);
+}
+
+function closeDrawer() {
+  document.getElementById('replyDrawer').classList.remove('open');
+  document.getElementById('drawerDim').classList.remove('show');
+  currentDrawerConsultaId = null;
+}
+
+async function sendReply() {
+  const resp = document.getElementById('d-respuesta').value.trim();
+  if (!resp) { showToast('Escribí una respuesta antes de guardar.', 'error'); return; }
+
+  try {
+    await apiPatch({ id_consulta: currentDrawerConsultaId, estado: 'respondido', respuesta: resp });
+    const c = CONSULTAS.find(x => x.id_consulta === currentDrawerConsultaId);
+    if (c) { c.respuesta = resp; c.estado = 'respondido'; }
+    updateBadge(); renderStats(); renderRecent(); filterConsultas();
+    closeDrawer();
+    showToast('Respuesta guardada y consulta marcada como Respondida.', 'success');
+  } catch(err) {
+    showToast('Error al guardar: ' + err.message, 'error');
+  }
+}
+
+/* ══════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════ */
+function fmtDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('es-AR', {day:'2-digit',month:'2-digit',year:'numeric'})
+    + ' ' + d.toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'});
+}
+
+let toastTimer;
+function showToast(msg, type='success') {
+  const el = document.getElementById('toast');
+  const icon = el.querySelector('i');
+  document.getElementById('toastMsg').textContent = msg;
+  el.className = 'show ' + type;
+  icon.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.className = '', 3000);
+}
+
+// Ripple en botón login
+document.getElementById('loginBtn').addEventListener('click', function(e) {
+  const r = document.createElement('span');
+  r.className = 'ripple';
+  const rect = this.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+  this.appendChild(r);
+  setTimeout(() => r.remove(), 600);
+});
+</script>
+</body>
+</html>
