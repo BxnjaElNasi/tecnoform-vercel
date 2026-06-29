@@ -11,6 +11,8 @@ nav { position:fixed; top:0; width:100%; background:var(--negro); display:flex; 
 .nav-links a { color:#ccc; text-decoration:none; font-size:.9rem; transition:color .2s; }
 .nav-links a:hover { color:var(--rojo); }
 .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; }
+.admin-btn { width:34px; height:34px; border-radius:50%; background:var(--rojo); display:flex; align-items:center; justify-content:center; color:#fff; text-decoration:none; font-size:.85rem; transition:background .2s, transform .15s, box-shadow .2s; flex-shrink:0; }
+.admin-btn:hover { background:#e74c3c; box-shadow:0 0 0 3px rgba(192,57,43,.35); transform:scale(1.08); }
 .hamburger span { width:24px; height:2px; background:var(--blanco); display:block; }
 
 /* HERO */
