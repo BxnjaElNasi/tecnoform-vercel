@@ -376,13 +376,7 @@ document.addEventListener('keydown', e => {
 
 function logout() {
   currentSession = null;
-  document.getElementById('shell').classList.remove('visible');
-  document.getElementById('shell').style.display = '';
-  const ov = document.getElementById('loginOverlay');
-  ov.style.display = 'flex';
-  ov.classList.remove('hide');
-  document.getElementById('loginUser').value = '';
-  document.getElementById('loginPass').value = '';
+  window.location.href = '/index.html';
 }
 
 const shakeStyle = document.createElement('style');
