@@ -18,7 +18,16 @@ const PRODUCTOS_DEMO = [
   { id:13, cat:'monitor', imagen_url:'samsung5.png',     nombre:'Samsung 27" QHD 165Hz Curvo',  spec:'2560x1440 · 165Hz · VA · HDMI+DP',          precio:'$298.000', stock:'pocas' },
 ];
 
+const CAT_DEFAULT = [
+  { value:'ram',     label:'RAM'      },
+  { value:'ssd',     label:'SSD'      },
+  { value:'teclado', label:'Teclados' },
+  { value:'mouse',   label:'Mouse'    },
+  { value:'monitor', label:'Monitores'},
+];
+
 let PRODUCTOS = [];
+let CATEGORIAS = [];
 
 function imgTag(p) {
   if (p.imagen_url) {
@@ -47,6 +56,35 @@ function renderProductos(cat) {
     </div>`).join('');
 }
 
+function buildCatTabs() {
+  const container = document.getElementById('catTabs');
+  if (!container) return;
+  const cats = CATEGORIAS.length ? CATEGORIAS : CAT_DEFAULT;
+  const extra = cats.map(c => `<button class="cat-tab" data-cat="${c.value}">${c.label}</button>`).join('');
+  container.innerHTML = `<button class="cat-tab active" data-cat="todos">Todos</button>${extra}`;
+  container.querySelectorAll('.cat-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      container.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderProductos(btn.dataset.cat);
+    });
+  });
+}
+
+async function cargarCategorias() {
+  try {
+    const res = await fetch('/api/categorias');
+    if (res.ok) {
+      const data = await res.json();
+      CATEGORIAS = data.length > 0 ? data : CAT_DEFAULT;
+    } else {
+      CATEGORIAS = CAT_DEFAULT;
+    }
+  } catch {
+    CATEGORIAS = CAT_DEFAULT;
+  }
+}
+
 async function cargarProductos() {
   try {
     const res = await fetch('/api/productos');
@@ -64,42 +102,12 @@ function consultar(nombre) {
   document.getElementById('contacto').scrollIntoView({behavior:'smooth'});
 }
 
-// Catálogo — filtro por categoría (tabs dinámicos desde localStorage)
-const CAT_KEY = 'tf_categorias';
-const CAT_DEFAULT = [
-  { value:'ram', label:'RAM' },
-  { value:'ssd', label:'SSD' },
-  { value:'teclado', label:'Teclados' },
-  { value:'mouse', label:'Mouse' },
-  { value:'monitor', label:'Monitores' }
-];
-
-function getCatsFrontend() {
-  try {
-    const raw = localStorage.getItem(CAT_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch(e) {}
-  return CAT_DEFAULT.map(c => ({ ...c }));
-}
-
-function buildCatTabs() {
-  const container = document.getElementById('catTabs');
-  if (!container) return;
-  const cats = getCatsFrontend();
-  const extra = cats.map(c => `<button class="cat-tab" data-cat="${c.value}">${c.label}</button>`).join('');
-  container.innerHTML = `<button class="cat-tab active" data-cat="todos">Todos</button>${extra}`;
-  container.querySelectorAll('.cat-tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-      container.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      renderProductos(btn.dataset.cat);
-    });
-  });
-}
-
-buildCatTabs();
-
-cargarProductos();
+// Inicialización: cargar categorías primero, luego armar tabs y productos
+(async function init() {
+  await cargarCategorias();
+  buildCatTabs();
+  await cargarProductos();
+})();
 
 // Hamburger — menú móvil
 const ham = document.getElementById('hamburger');

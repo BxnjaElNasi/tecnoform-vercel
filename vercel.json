@@ -1,7 +1,10 @@
 {
   "rewrites": [
-    { "source": "/api/consulta", "destination": "/api/consulta" },
-    { "source": "/api/consultas", "destination": "/api/consultas" },
-    { "source": "/(.*)", "destination": "/public/$1" }
+    { "source": "/api/consulta",        "destination": "/api/consulta"        },
+    { "source": "/api/consultas",       "destination": "/api/consultas"       },
+    { "source": "/api/admin-consultas", "destination": "/api/admin-consultas" },
+    { "source": "/api/productos",       "destination": "/api/productos"       },
+    { "source": "/api/categorias",      "destination": "/api/categorias"      },
+    { "source": "/(.*)",                "destination": "/public/$1"           }
   ]
 }
