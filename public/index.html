@@ -73,14 +73,9 @@
   <div class="container">
     <h2 class="section-title">Nuestro <span>Catálogo</span></h2>
 
-    <!-- CATEGORÍAS — editar aquí los nombres de las pestañas -->
-    <div class="cat-tabs">
+    <!-- CATEGORÍAS — se cargan dinámicamente desde localStorage -->
+    <div class="cat-tabs" id="catTabs">
       <button class="cat-tab active" data-cat="todos">Todos</button>
-      <button class="cat-tab" data-cat="ram">RAM</button>
-      <button class="cat-tab" data-cat="ssd">SSD</button>
-      <button class="cat-tab" data-cat="teclado">Teclados</button>
-      <button class="cat-tab" data-cat="mouse">Mouse</button>
-      <button class="cat-tab" data-cat="monitor">Monitores</button>
     </div>
 
     <div class="prod-grid" id="prodGrid"></div>

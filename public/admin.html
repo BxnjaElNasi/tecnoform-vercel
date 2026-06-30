@@ -314,6 +314,9 @@ tr:hover td{background:rgba(255,255,255,.03);}
       <div class="nav-item" data-page="catalogo" onclick="navTo('catalogo')">
         <i class="fas fa-box-open"></i> Catálogo
       </div>
+      <div class="nav-item" data-page="categorias" onclick="navTo('categorias')">
+        <i class="fas fa-tags"></i> Categorías
+      </div>
     </div>
 
     <div class="content">
@@ -439,6 +442,25 @@ tr:hover td{background:rgba(255,255,255,.03);}
         <!-- GRILLA DE PRODUCTOS -->
         <div id="prodAdminGrid" class="prod-admin-grid">
           <div class="loading-state"><i class="fas fa-spinner"></i><p>Cargando productos...</p></div>
+        </div>
+      </div>
+
+      <!-- CATEGORÍAS -->
+      <div class="page" id="page-categorias">
+        <div class="page-header">
+          <div>
+            <h1>Categorías</h1>
+            <p>Administrá las categorías del catálogo y sus filtros en el sitio</p>
+          </div>
+        </div>
+        <div class="prod-form-card" style="max-width:480px;">
+          <h3><i class="fas fa-tags" style="margin-right:.5rem;color:var(--rojo2);"></i>Categorías activas</h3>
+          <div id="adminCatList" style="display:flex;flex-direction:column;gap:.5rem;margin:1.2rem 0;"></div>
+          <div class="cat-add-row">
+            <input type="text" id="adminCatNueva" placeholder="Nueva categoría..." maxlength="30" onkeydown="if(event.key==='Enter')adminAgregarCat()">
+            <button onclick="adminAgregarCat()"><i class="fas fa-plus"></i> Agregar</button>
+          </div>
+          <p style="margin-top:1rem;font-size:.78rem;color:var(--gris);">Los cambios se aplican automáticamente en el sitio principal.</p>
         </div>
       </div>
 
@@ -944,6 +966,57 @@ const _origToggle = window.toggleFormProducto;
 window.toggleFormProducto = function() {
   _origToggle();
   renderSelectCat();
+};
+
+/* ══════════════════════════════════════════
+   PÁGINA CATEGORÍAS (admin)
+══════════════════════════════════════════ */
+function renderAdminCatList() {
+  const list = document.getElementById('adminCatList');
+  if (!list) return;
+  const cats = getCategorias();
+  if (!cats.length) {
+    list.innerHTML = '<p style="color:var(--gris);font-size:.85rem;">No hay categorías.</p>';
+    return;
+  }
+  list.innerHTML = cats.map((c, i) => `
+    <div class="cat-item">
+      <span class="cat-item-name">${c.label}</span>
+      <button class="cat-del-btn" onclick="adminEliminarCat(${i})" title="Eliminar"><i class="fas fa-times"></i></button>
+    </div>`).join('');
+}
+
+function adminAgregarCat() {
+  const input = document.getElementById('adminCatNueva');
+  const label = input.value.trim();
+  if (!label) return;
+  const value = label.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'');
+  const cats = getCategorias();
+  if (cats.find(c => c.value === value || c.label.toLowerCase() === label.toLowerCase())) {
+    showToast('Esa categoría ya existe.', 'error'); return;
+  }
+  cats.push({ value, label });
+  saveCategorias(cats);
+  input.value = '';
+  renderAdminCatList();
+  renderSelectCat();
+  showToast('Categoría agregada.', 'success');
+}
+
+function adminEliminarCat(idx) {
+  const cats = getCategorias();
+  cats.splice(idx, 1);
+  saveCategorias(cats);
+  renderAdminCatList();
+  renderSelectCat();
+  showToast('Categoría eliminada.', 'error');
+}
+
+// Render al navegar a la página
+const _origNavTo = window.navTo;
+window.navTo = function(page) {
+  _origNavTo(page);
+  if (page === 'categorias') renderAdminCatList();
 };
 </script>
 </body>

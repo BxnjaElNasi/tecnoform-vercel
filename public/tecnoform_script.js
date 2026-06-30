@@ -64,14 +64,40 @@ function consultar(nombre) {
   document.getElementById('contacto').scrollIntoView({behavior:'smooth'});
 }
 
-// Catálogo — filtro por categoría
-document.querySelectorAll('.cat-tab').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderProductos(btn.dataset.cat);
+// Catálogo — filtro por categoría (tabs dinámicos desde localStorage)
+const CAT_KEY = 'tf_categorias';
+const CAT_DEFAULT = [
+  { value:'ram', label:'RAM' },
+  { value:'ssd', label:'SSD' },
+  { value:'teclado', label:'Teclados' },
+  { value:'mouse', label:'Mouse' },
+  { value:'monitor', label:'Monitores' }
+];
+
+function getCatsFrontend() {
+  try {
+    const raw = localStorage.getItem(CAT_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return CAT_DEFAULT.map(c => ({ ...c }));
+}
+
+function buildCatTabs() {
+  const container = document.getElementById('catTabs');
+  if (!container) return;
+  const cats = getCatsFrontend();
+  const extra = cats.map(c => `<button class="cat-tab" data-cat="${c.value}">${c.label}</button>`).join('');
+  container.innerHTML = `<button class="cat-tab active" data-cat="todos">Todos</button>${extra}`;
+  container.querySelectorAll('.cat-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      container.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderProductos(btn.dataset.cat);
+    });
   });
-});
+}
+
+buildCatTabs();
 
 cargarProductos();
 
