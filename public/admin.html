@@ -190,6 +190,28 @@ tr:hover td{background:rgba(255,255,255,.03);}
 .pf-btn-cancel{padding:.75rem 1.2rem;background:var(--surface);border:1px solid var(--border2);border-radius:8px;color:var(--gris);cursor:pointer;transition:all .2s;}
 .pf-btn-cancel:hover{color:var(--blanco);}
 
+/* EDITAR CATEGORÍAS */
+.edit-cat-link{display:inline-flex;align-items:center;gap:.35rem;margin-top:.4rem;font-size:.78rem;color:var(--gris);cursor:pointer;background:none;border:none;padding:0;transition:color .2s;}
+.edit-cat-link:hover{color:var(--rojo2);}
+#catModal{position:fixed;inset:0;z-index:5000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.65);opacity:0;pointer-events:none;transition:opacity .25s;}
+#catModal.open{opacity:1;pointer-events:all;}
+.cat-modal-box{background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:1.8rem;width:360px;max-width:90vw;box-shadow:var(--shadow);transform:scale(.95);transition:transform .25s;}
+#catModal.open .cat-modal-box{transform:scale(1);}
+.cat-modal-box h4{font-size:1rem;font-weight:700;margin-bottom:1.2rem;display:flex;align-items:center;gap:.5rem;}
+.cat-modal-box h4 i{color:var(--rojo2);}
+.cat-list{display:flex;flex-direction:column;gap:.5rem;max-height:240px;overflow-y:auto;margin-bottom:1rem;}
+.cat-item{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.55rem .85rem;font-size:.88rem;}
+.cat-item-name{text-transform:capitalize;}
+.cat-del-btn{background:none;border:none;color:var(--gris2);cursor:pointer;padding:2px 6px;border-radius:5px;font-size:.85rem;transition:color .2s,background .2s;}
+.cat-del-btn:hover{color:var(--rojo2);background:rgba(231,76,60,.1);}
+.cat-add-row{display:flex;gap:.5rem;}
+.cat-add-row input{flex:1;padding:.6rem .8rem;background:var(--surface);border:1px solid var(--border2);border-radius:8px;color:var(--blanco);font-size:.88rem;}
+.cat-add-row input:focus{outline:none;border-color:var(--rojo);}
+.cat-add-row button{padding:.6rem 1rem;background:var(--rojo);border:none;border-radius:8px;color:#fff;font-size:.88rem;font-weight:600;cursor:pointer;transition:background .2s;}
+.cat-add-row button:hover{background:var(--rojo2);}
+.cat-modal-close{margin-top:1rem;width:100%;padding:.65rem;background:var(--surface);border:1px solid var(--border2);border-radius:8px;color:var(--gris);cursor:pointer;font-size:.88rem;transition:all .2s;}
+.cat-modal-close:hover{color:var(--blanco);}
+
 .prod-admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.2rem;}
 .pac{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:transform .2s,box-shadow .2s;position:relative;}
 .pac:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.35);}
@@ -383,13 +405,8 @@ tr:hover td{background:rgba(255,255,255,.03);}
               </div>
               <div class="pf-group">
                 <label>Categoría *</label>
-                <select id="pf-cat">
-                  <option value="ram">RAM</option>
-                  <option value="ssd">SSD</option>
-                  <option value="teclado">Teclado</option>
-                  <option value="mouse">Mouse</option>
-                  <option value="monitor">Monitor</option>
-                </select>
+                <select id="pf-cat"></select>
+                <button type="button" class="edit-cat-link" onclick="abrirModalCategorias()"><i class="fas fa-pencil-alt"></i> Editar categorías</button>
               </div>
               <div class="pf-group">
                 <label>Especificaciones</label>
@@ -710,7 +727,9 @@ async function loadProductosAdmin() {
   }
 }
 
-const CAT_LABELS = { ram:'RAM', ssd:'SSD', teclado:'Teclado', mouse:'Mouse', monitor:'Monitor' };
+function getCAT_LABELS() {
+  return Object.fromEntries(getCategorias().map(c => [c.value, c.label]));
+}
 
 function renderProductosAdmin() {
   const grid = document.getElementById('prodAdminGrid');
@@ -719,6 +738,7 @@ function renderProductosAdmin() {
     return;
   }
   grid.innerHTML = PRODUCTOS_ADMIN.map(p => {
+    const CAT_LABELS = getCAT_LABELS();
     const imgHtml = p.imagen_url
       ? `<img class="pac-img" src="${p.imagen_url}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="pac-img-placeholder" style="display:none;">📦</div>`
       : `<div class="pac-img-placeholder">📦</div>`;
@@ -820,6 +840,111 @@ document.getElementById('loginBtn').addEventListener('click', function(e) {
   this.appendChild(r);
   setTimeout(() => r.remove(), 600);
 });
+</script>
+
+<!-- MODAL CATEGORÍAS -->
+<div id="catModal" onclick="if(event.target===this)cerrarModalCategorias()">
+  <div class="cat-modal-box">
+    <h4><i class="fas fa-tags"></i> Categorías de productos</h4>
+    <div class="cat-list" id="catList"></div>
+    <div class="cat-add-row">
+      <input type="text" id="catNueva" placeholder="Nueva categoría..." maxlength="30" onkeydown="if(event.key==='Enter')agregarCategoria()">
+      <button onclick="agregarCategoria()"><i class="fas fa-plus"></i></button>
+    </div>
+    <button class="cat-modal-close" onclick="cerrarModalCategorias()">Cerrar</button>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   GESTIÓN DE CATEGORÍAS
+══════════════════════════════════════════ */
+const CAT_DEFAULT = [
+  { value: 'ram',     label: 'RAM'     },
+  { value: 'ssd',     label: 'SSD'     },
+  { value: 'teclado', label: 'Teclado' },
+  { value: 'mouse',   label: 'Mouse'   },
+  { value: 'monitor', label: 'Monitor' }
+];
+const CAT_KEY = 'tf_categorias';
+
+function getCategorias() {
+  try {
+    const raw = localStorage.getItem(CAT_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return CAT_DEFAULT.map(c => ({ ...c }));
+}
+
+function saveCategorias(cats) {
+  localStorage.setItem(CAT_KEY, JSON.stringify(cats));
+}
+
+function renderSelectCat() {
+  const sel = document.getElementById('pf-cat');
+  if (!sel) return;
+  const prev = sel.value;
+  const cats = getCategorias();
+  sel.innerHTML = cats.map(c => `<option value="${c.value}">${c.label}</option>`).join('');
+  if (cats.find(c => c.value === prev)) sel.value = prev;
+}
+
+function renderCatList() {
+  const list = document.getElementById('catList');
+  const cats = getCategorias();
+  if (!cats.length) {
+    list.innerHTML = '<p style="color:var(--gris);font-size:.82rem;text-align:center;">No hay categorías.</p>';
+    return;
+  }
+  list.innerHTML = cats.map((c, i) => `
+    <div class="cat-item">
+      <span class="cat-item-name">${c.label}</span>
+      <button class="cat-del-btn" onclick="eliminarCategoria(${i})" title="Eliminar"><i class="fas fa-times"></i></button>
+    </div>`).join('');
+}
+
+function abrirModalCategorias() {
+  renderCatList();
+  document.getElementById('catModal').classList.add('open');
+  setTimeout(() => document.getElementById('catNueva').focus(), 200);
+}
+
+function cerrarModalCategorias() {
+  document.getElementById('catModal').classList.remove('open');
+  renderSelectCat();
+}
+
+function agregarCategoria() {
+  const input = document.getElementById('catNueva');
+  const label = input.value.trim();
+  if (!label) return;
+  const value = label.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'');
+  const cats = getCategorias();
+  if (cats.find(c => c.value === value || c.label.toLowerCase() === label.toLowerCase())) {
+    showToast('Esa categoría ya existe.', 'error');
+    return;
+  }
+  cats.push({ value, label });
+  saveCategorias(cats);
+  input.value = '';
+  renderCatList();
+}
+
+function eliminarCategoria(idx) {
+  const cats = getCategorias();
+  cats.splice(idx, 1);
+  saveCategorias(cats);
+  renderCatList();
+}
+
+// Inicializar select al cargar
+document.addEventListener('DOMContentLoaded', renderSelectCat);
+// También al abrir el form de producto
+const _origToggle = window.toggleFormProducto;
+window.toggleFormProducto = function() {
+  _origToggle();
+  renderSelectCat();
+};
 </script>
 </body>
 </html>
